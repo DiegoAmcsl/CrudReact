@@ -43,6 +43,28 @@ app.get("/empleados", (req, res) => {
   });
 });
 
+app.put("/update", (req, res) => {
+  const id = req.body.id;
+  const nombre = req.body.nombre;
+  const edad = req.body.edad;
+  const pais = req.body.pais;
+  const cargo = req.body.cargo;
+  const experiencia = req.body.experiencia;
+
+  db.query(
+    "UPDATE empleados SET nombre = ?, edad = ?, pais = ?, cargo = ?, experiencia = ? WHERE id = ?",
+    [nombre, edad, pais, cargo, experiencia, id],
+    (err, result) => {
+      if (err) {
+        console.log(err);
+      } else {
+        res.send("empleado actualizado con exito");
+      }
+    }
+  );
+});
+
+
 app.listen(3001, () => {
   console.log("En linea en el puerto 3001...");
 });
