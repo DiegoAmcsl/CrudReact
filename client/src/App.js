@@ -11,8 +11,8 @@ function App() {
   const [experiencia, setExperiencia] = useState(0);
   const [id, setId] = useState(0);
   const [editar, setEditar] = useState(false);
-
   const [empleadosList, setEmpleados] = useState([]);
+  
   const add = () => {
     Axios.post("http://localhost:3001/create", {
       nombre,
@@ -20,20 +20,51 @@ function App() {
       pais,
       cargo,
       experiencia,
-    }).then(() => {
-      Swal.fire("Empleado Agregado con exito!");
-      getEmpleados();
-      limpiar();
-    });
+    })
+      .then(() => {
+        getEmpleados();
+        limpiar();
+        // Swal.fire("Empleado Agregado con exito!");
+        Swal.fire({
+          title: "<h2>¡Registo exitoso!</h2>",
+          html:
+            "<p>El empleado <strong>" +
+            nombre +
+            "</strong> fue creado con exito</strong>",
+          icon: "success",
+          timer: 3000,
+        });
+      })
+      .catch(function (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          html: `<h4> Algo salió mal!</h4> ${JSON.stringify(error.message)}`,
+          footer:
+            error.code === "ERR_NETWORK"
+              ? "<strong>Intente mas tarde</strong>"
+              : error.message,
+        });
+      });
   };
 
   const getEmpleados = () => {
-    Axios.get("http://localhost:3001/empleados").then((response) => {
-      setEmpleados(response.data);
-    });
+    Axios.get("http://localhost:3001/empleados")
+      .then((response) => {
+        setEmpleados(response.data);
+      })
+      .catch(function (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          html: `<h4> Algo salió mal!</h4> ${JSON.stringify(error.message)}`,
+          footer:
+            error.code === "ERR_NETWORK"
+              ? "<strong>Intente mas tarde</strong>"
+              : error.message,
+        });
+      });
   };
-
-  //
 
   const editEmpleado = (val) => {
     setEditar(true);
@@ -63,10 +94,73 @@ function App() {
       cargo,
       experiencia,
       id,
-    }).then(() => {
-      getEmpleados();
-      limpiar();
-      alert("Empleado Actualizado");
+    })
+      .then(() => {
+        getEmpleados();
+        limpiar();
+        // Swal.fire("Empleado modificado con exito!");
+        Swal.fire({
+          title: "<h2>Edicion exitosa!</h2>",
+          html:
+            "<p>El empleado <strong>" +
+            nombre +
+            "</strong> fue modificado con exito</strong>",
+          icon: "success",
+          timer: 3000,
+        });
+      })
+      .catch(function (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          html: `<h4> Algo salió mal!</h4> ${JSON.stringify(error.message)}`,
+          footer:
+            error.code === "ERR_NETWORK"
+              ? "<strong>Intente mas tarde</strong>"
+              : error.message,
+        });
+      });
+  };
+
+  const delEmpleado = (val) => {
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: `El usuario ${val.nombre} será eliminado`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Si, Eliminar",
+      cancelButtonText: "Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Axios.delete(`http://localhost:3001/delete/${val.id}`)
+          .then(() => {
+            getEmpleados();
+            Swal.fire({
+              title: "<h2>Registro Eliminado!</h2>",
+              html:
+                "<p>El empleado <strong>" +
+                val.nombre +
+                "</strong> fue eliminado con exito</strong>",
+              icon: "success",
+              timer: 3000,
+            });
+          })
+          .catch(function (error) {
+            Swal.fire({
+              icon: "error",
+              title: "Oops...",
+              html: `<h4> Algo salió mal!</h4> ${JSON.stringify(
+                error.message
+              )}`,
+              footer:
+                error.code === "ERR_NETWORK"
+                  ? "<strong>Intente mas tarde</strong>"
+                  : error.message,
+            });
+          });
+      }
     });
   };
 
@@ -192,7 +286,13 @@ function App() {
                       >
                         Edit
                       </button>
-                      <button type="button" className="btn btn-danger">
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => {
+                          delEmpleado(val);
+                        }}
+                      >
                         Delete
                       </button>
                     </div>
